@@ -15,12 +15,17 @@ public class Task {
         return description;
     }
 
-   public void markAsDone() {
-       isDone = true;
-   }
+    public void markAsDone() {
+        isDone = true;
+    }
 
-   public void unmarkAsDone() {
-       isDone = false;
-   }
+    public void unmarkAsDone() {
+        isDone = false;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + this.getStatusIcon() + "]" + this.getDescription();
+    }
 
 }
