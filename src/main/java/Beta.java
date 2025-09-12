@@ -15,29 +15,35 @@ public class Beta {
             String line = in.nextLine();
             if (line.equals("bye")) break;
 
-            String[] parts = line.split(" ", 2);
-            String command = parts[0];
-            String inputBody = (parts.length > 1) ? parts[1] : "";
+            try {
+                String[] parts = line.split(" ", 2);
+                String command = parts[0];
+                String inputBody = (parts.length > 1) ? parts[1] : "";
 
-            switch (command) {
-            case "todo":
-                handleTodo(inputBody);
-                break;
-            case "deadline":
-                handleDeadline(inputBody);
-                break;
-            case "event":
-                handleEvent(inputBody);
-                break;
-            case "list":
-                handleList();
-                break;
-            case "mark":
-                handleMark(inputBody);
-                break;
-            case "unmark":
-                handleUnmark(inputBody);
-                break;
+                switch (command) {
+                case "todo":
+                    handleTodo(inputBody);
+                    break;
+                case "deadline":
+                    handleDeadline(inputBody);
+                    break;
+                case "event":
+                    handleEvent(inputBody);
+                    break;
+                case "list":
+                    handleList();
+                    break;
+                case "mark":
+                    handleMark(inputBody);
+                    break;
+                case "unmark":
+                    handleUnmark(inputBody);
+                    break;
+                default:
+                    throw new BetaException("Hmmmmm? I don't know what this means: " + command);
+                }
+            } catch (BetaException e) {
+                System.out.println(e.getMessage() + "\n");
             }
         }
         exitProgram();
@@ -47,25 +53,31 @@ public class Beta {
         System.out.println("Bye. See you soon!");
     }
 
-    private static void handleUnmark(String inputBody) {
+    private static void handleUnmark(String inputBody) throws BetaException {
+        if (inputBody == null || inputBody.trim().isEmpty()) {
+            throw new BetaException("There is nothing to unmark! Please specify which task to unmark.");
+        }
         int index = Integer.parseInt(inputBody) - 1;
         if (index >= 0 && index < taskCount) {
             tasks[index].unmarkAsDone();
             System.out.println("Ok I've unmarked this task:");
             System.out.println(tasks[index].toString() + "\n");
         } else {
-            System.out.println("Invalid task number.\n");
+            throw new BetaException("Invalid task number for unmark.");
         }
     }
 
-    private static void handleMark(String inputBody) {
+    private static void handleMark(String inputBody) throws BetaException {
+        if (inputBody == null || inputBody.trim().isEmpty()) {
+            throw new BetaException("There is nothing to mark! Please specify which task to mark.");
+        }
         int index = Integer.parseInt(inputBody) - 1;
         if (index >= 0 && index < taskCount) {
             tasks[index].markAsDone();
             System.out.println("Nice! I've marked this task as done:");
             System.out.println(tasks[index] + "\n");
         } else {
-            System.out.println("Invalid task number.\n");
+            throw new BetaException("Invalid task number.\n");
         }
     }
 
