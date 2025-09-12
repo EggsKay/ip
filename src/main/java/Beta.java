@@ -92,6 +92,7 @@ public class Beta {
     }
 
     private static void handleEvent(String inputBody) {
+
         int fromIndex = inputBody.indexOf(" /from ");
         int toIndex = inputBody.indexOf(" /to ");
         String eventTask = inputBody.substring(0, fromIndex);
@@ -102,17 +103,31 @@ public class Beta {
         taskCount++;
     }
 
-    private static void handleDeadline(String inputBody) {
+    private static void handleDeadline(String inputBody) throws BetaException {
+        if (inputBody == null || inputBody.trim().isEmpty()) {
+            throw new BetaException("Its empty.Reminder to put the description of your deadline.");
+        }
+        if (!inputBody.contains(" /by ")) {
+            throw new BetaException("Deadline format must be: deadline <description> /by <time>");
+        }
         int byIndex = inputBody.indexOf(" /by ");
         String deadlineTask = inputBody.substring(0, byIndex);
         String deadline = inputBody.substring(byIndex + 5);
+
+        if (deadline.isEmpty()) {
+            throw new BetaException("When do you want to do this task by?");
+        }
+
         tasks[taskCount] = new Deadline(deadlineTask, deadline);
         System.out.println("Nice added this: \n" + tasks[taskCount].toString() + "\n");
         taskCount++;
     }
 
-    private static void handleTodo(String inputBody) {
-        tasks[taskCount] = new Todo(inputBody);
+    private static void handleTodo(String inputBody) throws BetaException {
+        if (inputBody == null || inputBody.trim().isEmpty()) {
+            throw new BetaException("Your task is empty. Please input a valid task.");
+        }
+        tasks[taskCount] = new Todo(inputBody.trim());
         System.out.println("Nice added this: \n" + tasks[taskCount].toString() + "\n");
         taskCount++;
     }
