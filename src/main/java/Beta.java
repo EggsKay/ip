@@ -1,11 +1,10 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Arrays;
 
 public class Beta {
 
-    private static final int MAX_TASKS = 100;
-    private static final Task[] tasks = new Task[MAX_TASKS];
-    private static int taskCount = 0;
+    private static final ArrayList<Task> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
@@ -61,10 +60,11 @@ public class Beta {
             throw new BetaException("There is nothing to unmark! Please specify which task to unmark.");
         }
         int index = Integer.parseInt(inputBody) - 1;
-        if (index >= 0 && index < taskCount) {
-            tasks[index].unmarkAsDone();
+        if (index >= 0 && index < tasks.size()) {
+            Task task = tasks.get(index);
+            task.unmarkAsDone();
             System.out.println("Ok I've unmarked this task:");
-            System.out.println(tasks[index].toString() + "\n");
+            System.out.println(task + "\n");
         } else {
             throw new BetaException("Invalid task number for unmark.");
         }
@@ -75,21 +75,23 @@ public class Beta {
             throw new BetaException("There is nothing to mark! Please specify which task to mark.");
         }
         int index = Integer.parseInt(inputBody) - 1;
-        if (index >= 0 && index < taskCount) {
-            tasks[index].markAsDone();
+        if (index >= 0 && index < tasks.size()) {
+            Task task = tasks.get(index);
+            task.markAsDone();
             System.out.println("Nice! I've marked this task as done:");
-            System.out.println(tasks[index] + "\n");
+            System.out.println(task + "\n");
         } else {
             throw new BetaException("Invalid task number.\n");
         }
     }
 
     private static void handleList() {
-        if (taskCount == 0) {
+        if (tasks.isEmpty()) {
             System.out.println("YAY!! Good Job!! There is nothing to do.");
         }
-        for (int i = 1; i <= taskCount; i++) {
-            System.out.println(i + ". " + tasks[i - 1].toString());
+        System.out.println("Your tasks are:");
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println((i + 1) + ". " + tasks.get(i));
         }
         System.out.println("");
     }
@@ -101,9 +103,9 @@ public class Beta {
         String eventTask = inputBody.substring(0, fromIndex);
         String from = inputBody.substring(fromIndex + 7, toIndex);
         String to = inputBody.substring(toIndex + 5);
-        tasks[taskCount] = new Event(eventTask, from, to);
-        System.out.println("Nice added this: \n" + tasks[taskCount].toString() + "\n");
-        taskCount++;
+        Task task = new Event(eventTask, from, to);
+        tasks.add(task);
+        System.out.println("Nice added this: \n" + task + "\n");
     }
 
     private static void handleDeadline(String inputBody) throws BetaException {
@@ -121,18 +123,18 @@ public class Beta {
             throw new BetaException("When do you want to do this task by?");
         }
 
-        tasks[taskCount] = new Deadline(deadlineTask, deadline);
-        System.out.println("Nice added this: \n" + tasks[taskCount].toString() + "\n");
-        taskCount++;
+        Task task = new Deadline(deadlineTask, deadline);
+        tasks.add(task);
+        System.out.println("Nice added this: \n" + task + "\n");
     }
 
     private static void handleTodo(String inputBody) throws BetaException {
         if (inputBody == null || inputBody.trim().isEmpty()) {
             throw new BetaException("Your task is empty. Please input a valid task.");
         }
-        tasks[taskCount] = new Todo(inputBody.trim());
-        System.out.println("Nice added this: \n" + tasks[taskCount].toString() + "\n");
-        taskCount++;
+        Task task = new Todo(inputBody.trim());
+        tasks.add(task);
+        System.out.println("Nice added this: \n" + task + "\n");
     }
 
     private static void greetUser() {
@@ -149,24 +151,12 @@ public class Beta {
         } catch (NumberFormatException e) {
             throw new BetaException("Invalid delete command! Provide a valid task number.");
         }
+        Task removedTask = tasks.remove(index);
 
-        if (index >= 0 && index < taskCount) {
-            Task removedTask = tasks[index];
+        System.out.println("Alright. I've removed this task:");
+        System.out.println(removedTask);
+        System.out.println("Now you have " + tasks.size() + " tasks in the list.\n");
 
-            //Shift remaining tasks left
-            for (int i = index; i < taskCount - 1; i++) {
-                tasks[i] = tasks[i + 1];
-            }
-
-            tasks[taskCount - 1] = null;
-            taskCount--;
-
-            System.out.println("Alright. I've removed this task:");
-            System.out.println(removedTask);
-            System.out.println("Now you have " + taskCount + " tasks in the list.\n");
-
-        } else {
-            throw new BetaException("Invalid task number for delete.");
-        }
     }
+
 }
