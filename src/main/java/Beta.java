@@ -39,6 +39,9 @@ public class Beta {
                 case "unmark":
                     handleUnmark(inputBody);
                     break;
+                case "delete":
+                    handleDelete(inputBody);
+                    break;
                 default:
                     throw new BetaException("Hmmmmm? I don't know what this means: " + command);
                 }
@@ -134,5 +137,36 @@ public class Beta {
 
     private static void greetUser() {
         System.out.println("Hello! I'm Beta\nWhat can I do for you?\n");
+    }
+
+    private static void handleDelete(String inputBody) throws BetaException {
+        if (inputBody == null || inputBody.trim().isEmpty()) {
+            throw new BetaException("Give me something to  delete! Please specify which task to delete.");
+        }
+        int index;
+        try {
+            index = Integer.parseInt(inputBody.trim()) - 1;
+        } catch (NumberFormatException e) {
+            throw new BetaException("Invalid delete command! Provide a valid task number.");
+        }
+
+        if (index >= 0 && index < taskCount) {
+            Task removedTask = tasks[index];
+
+            //Shift remaining tasks left
+            for (int i = index; i < taskCount - 1; i++) {
+                tasks[i] = tasks[i + 1];
+            }
+
+            tasks[taskCount - 1] = null;
+            taskCount--;
+
+            System.out.println("Alright. I've removed this task:");
+            System.out.println(removedTask);
+            System.out.println("Now you have " + taskCount + " tasks in the list.\n");
+
+        } else {
+            throw new BetaException("Invalid task number for delete.");
+        }
     }
 }
