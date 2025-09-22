@@ -6,18 +6,20 @@ public class Beta {
     private static final int MAX_TASKS = 100;
     private static final Task[] tasks = new Task[MAX_TASKS];
     private static int taskCount = 0;
+    private static final Storage storage = new Storage("./data/beta.txt");
 
     public static void main(String[] args) {
+        taskCount = storage.load(tasks);
         Scanner in = new Scanner(System.in);
         greetUser();
 
         while (true) {
             String line = in.nextLine();
-            if (line.equals("bye")) break;
+            if (line.equalsIgnoreCase("bye")) break;
 
             try {
                 String[] parts = line.split(" ", 2);
-                String command = parts[0];
+                String command = parts[0].toLowerCase();
                 String inputBody = (parts.length > 1) ? parts[1] : "";
 
                 switch (command) {
@@ -46,6 +48,7 @@ public class Beta {
                 System.out.println(e.getMessage() + "\n");
             }
         }
+        storage.save(tasks, taskCount);
         exitProgram();
     }
 
@@ -62,6 +65,7 @@ public class Beta {
             tasks[index].unmarkAsDone();
             System.out.println("Ok I've unmarked this task:");
             System.out.println(tasks[index].toString() + "\n");
+            storage.save(tasks, taskCount);
         } else {
             throw new BetaException("Invalid task number for unmark.");
         }
@@ -76,6 +80,7 @@ public class Beta {
             tasks[index].markAsDone();
             System.out.println("Nice! I've marked this task as done:");
             System.out.println(tasks[index] + "\n");
+            storage.save(tasks, taskCount);
         } else {
             throw new BetaException("Invalid task number.\n");
         }
@@ -84,6 +89,7 @@ public class Beta {
     private static void handleList() {
         if (taskCount == 0) {
             System.out.println("YAY!! Good Job!! There is nothing to do.");
+            return;
         }
         for (int i = 1; i <= taskCount; i++) {
             System.out.println(i + ". " + tasks[i - 1].toString());
@@ -101,6 +107,7 @@ public class Beta {
         tasks[taskCount] = new Event(eventTask, from, to);
         System.out.println("Nice added this: \n" + tasks[taskCount].toString() + "\n");
         taskCount++;
+        storage.save(tasks, taskCount);
     }
 
     private static void handleDeadline(String inputBody) throws BetaException {
@@ -121,6 +128,7 @@ public class Beta {
         tasks[taskCount] = new Deadline(deadlineTask, deadline);
         System.out.println("Nice added this: \n" + tasks[taskCount].toString() + "\n");
         taskCount++;
+        storage.save(tasks, taskCount);
     }
 
     private static void handleTodo(String inputBody) throws BetaException {
@@ -130,6 +138,7 @@ public class Beta {
         tasks[taskCount] = new Todo(inputBody.trim());
         System.out.println("Nice added this: \n" + tasks[taskCount].toString() + "\n");
         taskCount++;
+        storage.save(tasks, taskCount);
     }
 
     private static void greetUser() {
