@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class Storage {
     }
 
     // Save tasks to disk
-    public void save(ArrayList<Task> tasks) {
+    public void save(ArrayList<Task> tasks) throws BetaException {
         try {
             File file = new File(filePath);
             File parentDir = file.getParentFile();
@@ -26,17 +27,19 @@ public class Storage {
             }
             writer.close();
         } catch (IOException e) {
-            System.out.println("Error saving tasks: " + e.getMessage());
+            throw new BetaException("Failed to save tasks: " + e.getMessage());
         }
     }
 
     // Load tasks from disk
-    public void load(ArrayList<Task> tasks) {
+    public ArrayList<Task> load() throws BetaException {
+        ArrayList<Task> tasks = new ArrayList<>();
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            return tasks;
+        }
         try {
-            File file = new File(filePath);
-            if (!file.exists()) {
-                return;
-            }
 
             Scanner scanner = new Scanner(file);
             while (scanner.hasNextLine()) {
@@ -47,9 +50,12 @@ public class Storage {
                 }
             }
             scanner.close();
+            return tasks;
         } catch (IOException e) {
-            System.out.println("Error loading tasks: " + e.getMessage());
+
+            throw new BetaException("");
         }
     }
 }
+
 

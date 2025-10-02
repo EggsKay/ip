@@ -1,177 +1,103 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Beta {
+    private Ui ui;
 
-    private static final ArrayList<Task> tasks = new ArrayList<>();
-    private static final Storage storage = new Storage("./data/beta.txt");
+    private TaskList tasks;
+    private Storage storage;
 
-    public static void main(String[] args) {
-        storage.load(tasks);
-        Scanner in = new Scanner(System.in);
-        greetUser();
+    public Beta(String filePath) {
+        ui = new Ui();
+        storage = new Storage(filePath);
+        try {
+            tasks = new TaskList(storage.load());
+        } catch (BetaException e) {
+            ui.showLoadingError();
+            tasks = new TaskList();
+        }
+    }
 
-        while (true) {
-            String line = in.nextLine();
-            if (line.equalsIgnoreCase("bye")) break;
+
+    public void run() {
+        ui.greetUser();
+        boolean isExit = false;
+        while (!isExit) {
 
             try {
-                String[] parts = line.split(" ", 2);
-                String command = parts[0].toLowerCase();
-                String inputBody = (parts.length > 1) ? parts[1] : "";
+                String fullCommand = ui.readCommand();
+                String[] parsedCommand = Parser.parse(fullCommand);
+                String command = parsedCommand[0];
+                String inputBody = parsedCommand[1];
 
                 switch (command) {
-                case "todo":
-                    handleTodo(inputBody);
-                    break;
-                case "deadline":
-                    handleDeadline(inputBody);
-                    break;
-                case "event":
-                    handleEvent(inputBody);
-                    break;
                 case "list":
-                    handleList();
+                    tasks.printTasks(ui);
                     break;
                 case "mark":
-                    handleMark(inputBody);
+                    tasks.markTask(Integer.parseInt(inputBody));
+                    ui.showMessage("Nice! I've marked this task as done:\n" + tasks.get(Integer.parseInt(inputBody) - 1));
                     break;
                 case "unmark":
-                    handleUnmark(inputBody);
+                    tasks.unmarkTask(Integer.parseInt(inputBody));
+                    ui.showMessage("Ok I've unmarked this task:\n" + tasks.get(Integer.parseInt(inputBody) - 1));
                     break;
                 case "delete":
-                    handleDelete(inputBody);
+                    Task removedTask = tasks.deleteTask(Integer.parseInt(inputBody));
+                    ui.showMessage("Alright. I've removed this task:\n" + removedTask);
+                    break;
+                case "todo":
+                    Task todo = new Todo(inputBody);
+                    tasks.addTask(todo);
+                    ui.showMessage("Got it. I've added this todo:\n  " + todo + "\nNow you have " + tasks.getTasks().size() + " tasks in the list.");
+                    break;
+                case "deadline":
+                    String[] deadlineParts = inputBody.split(" /by ", 2);
+                    Task deadline = new Deadline(deadlineParts[0].trim(), deadlineParts[1].trim());
+                    tasks.addTask(deadline);
+                    ui.showMessage("Alright. I've added this deadline:\n  " + deadline + "\nNow you have " + tasks.getTasks().size() + " tasks in the list.");
+                    break;
+                case "event":
+                    String[] eventParts = inputBody.split(" /from | /to ");
+
+                    if (eventParts.length < 3) {
+                        throw new BetaException("Event format is invalid. Use: event <description> /from <start> /to <end>");
+                    }
+
+                    Task event = new Event(eventParts[0].trim(), eventParts[1].trim(), eventParts[2].trim());
+                    tasks.addTask(event);
+                    ui.showMessage("Got it. I've added this event:\n  " + event + "\nNow you have " + tasks.getTasks().size() + " tasks in the list.");
+                    break;
+                case "bye":
+                    isExit = true;
                     break;
                 default:
-                    throw new BetaException("Hmmmmm? I don't know what this means: " + command);
+                    ui.showError("Hmmmmmmm. I don't know what that means. Try 'todo', 'list', or 'bye'!");
                 }
+
+                if (!isExit) {
+                    try {
+                        storage.save(tasks.getTasks());
+                    } catch (BetaException e) {
+                        ui.showError("WARNING: Task failed to save: " + e.getMessage());
+                    }
+                }
+
             } catch (BetaException e) {
-                System.out.println(e.getMessage() + "\n");
+                ui.showError(e.getMessage());
+            } catch (Exception e) {
+                ui.showError("An unexpected error occurred: " + e.getMessage());
             }
         }
 
-        storage.save(tasks);
-        exitProgram();
+        ui.showExitMessage();
     }
 
-    private static void greetUser() {
-        System.out.println("Hello! I'm Beta\nWhat can I do for you?\n");
+
+    public static void main(String[] args) {
+
+        new Beta("data/Beta.txt").run();
     }
 
-    private static void exitProgram() {
-        System.out.println("Bye. See you soon!");
-    }
-
-    private static void handleTodo(String inputBody) throws BetaException {
-        if (inputBody == null || inputBody.trim().isEmpty()) {
-            throw new BetaException("Your task is empty. Please input a valid task.");
-        }
-        Task task = new Todo(inputBody.trim());
-        tasks.add(task);
-        System.out.println("Nice added this: \n" + task + "\n");
-        storage.save(tasks);
-    }
-
-    private static void handleDeadline(String inputBody) throws BetaException {
-        if (inputBody == null || inputBody.trim().isEmpty()) {
-            throw new BetaException("It's empty. Reminder to put the description of your deadline.");
-        }
-        if (!inputBody.contains(" /by ")) {
-            throw new BetaException("Deadline format must be: deadline <description> /by <time>");
-        }
-        int byIndex = inputBody.indexOf(" /by ");
-        String deadlineTask = inputBody.substring(0, byIndex);
-        String deadline = inputBody.substring(byIndex + 5);
-
-        if (deadline.isEmpty()) {
-            throw new BetaException("When do you want to do this task by?");
-        }
-
-        Task task = new Deadline(deadlineTask, deadline);
-        tasks.add(task);
-        System.out.println("Nice added this: \n" + task + "\n");
-        storage.save(tasks);
-    }
-
-    private static void handleEvent(String inputBody) throws BetaException {
-        if (!inputBody.contains(" /from ") || !inputBody.contains(" /to ")) {
-            throw new BetaException("Event format must be: event <description> /from <start> /to <end>");
-        }
-
-        int fromIndex = inputBody.indexOf(" /from ");
-        int toIndex = inputBody.indexOf(" /to ");
-        String eventTask = inputBody.substring(0, fromIndex);
-        String from = inputBody.substring(fromIndex + 7, toIndex);
-        String to = inputBody.substring(toIndex + 5);
-
-        Task task = new Event(eventTask, from, to);
-        tasks.add(task);
-        System.out.println("Nice added this: \n" + task + "\n");
-        storage.save(tasks);
-    }
-
-    private static void handleList() {
-        if (tasks.isEmpty()) {
-            System.out.println("YAY!! Good Job!! There is nothing to do.\n");
-            return;
-        }
-        System.out.println("Your tasks are:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + ". " + tasks.get(i));
-        }
-        System.out.println("");
-    }
-
-    private static void handleMark(String inputBody) throws BetaException {
-        if (inputBody == null || inputBody.trim().isEmpty()) {
-            throw new BetaException("There is nothing to mark! Please specify which task to mark.");
-        }
-        int index = Integer.parseInt(inputBody) - 1;
-        if (index >= 0 && index < tasks.size()) {
-            Task task = tasks.get(index);
-            task.markAsDone();
-            System.out.println("Nice! I've marked this task as done:");
-            System.out.println(task + "\n");
-            storage.save(tasks);
-        } else {
-            throw new BetaException("Invalid task number.");
-        }
-    }
-
-    private static void handleUnmark(String inputBody) throws BetaException {
-        if (inputBody == null || inputBody.trim().isEmpty()) {
-            throw new BetaException("There is nothing to unmark! Please specify which task to unmark.");
-        }
-        int index = Integer.parseInt(inputBody) - 1;
-        if (index >= 0 && index < tasks.size()) {
-            Task task = tasks.get(index);
-            task.unmarkAsDone();
-            System.out.println("Ok I've unmarked this task:");
-            System.out.println(task + "\n");
-            storage.save(tasks);
-        } else {
-            throw new BetaException("Invalid task number for unmark.");
-        }
-    }
-
-    private static void handleDelete(String inputBody) throws BetaException {
-        if (inputBody == null || inputBody.trim().isEmpty()) {
-            throw new BetaException("Give me something to delete! Please specify which task to delete.");
-        }
-        int index;
-        try {
-            index = Integer.parseInt(inputBody.trim()) - 1;
-        } catch (NumberFormatException e) {
-            throw new BetaException("Invalid delete command! Provide a valid task number.");
-        }
-        if (index < 0 || index >= tasks.size()) {
-            throw new BetaException("Invalid task number for delete.");
-        }
-
-        Task removedTask = tasks.remove(index);
-        System.out.println("Alright. I've removed this task:");
-        System.out.println(removedTask);
-        System.out.println("Now you have " + tasks.size() + " tasks in the list.\n");
-        storage.save(tasks);
-    }
 }
