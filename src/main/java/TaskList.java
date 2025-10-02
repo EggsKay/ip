@@ -9,6 +9,9 @@ public class TaskList {
         this.tasks = new ArrayList<>();
     }
 
+    public int size() {
+        return tasks.size();
+    }
 
     public TaskList(ArrayList<Task> tasks) {
         this.tasks = tasks;
@@ -48,6 +51,17 @@ public class TaskList {
         tasks.get(index - 1).unmarkAsDone();
     }
 
+    public TaskList findTasks(String keyword) {
+        ArrayList<Task> matchingTasks = new ArrayList<>();
+        String lowerCaseKeyword = keyword.toLowerCase();
+
+        for (Task task : tasks) {
+            if (task.description.toLowerCase().contains(lowerCaseKeyword)) {
+                matchingTasks.add(task);
+            }
+        }
+        return new TaskList(matchingTasks);
+    }
 
     public void printTasks(Ui ui) {
         if (tasks.isEmpty()) {

@@ -45,6 +45,12 @@ public class Parser {
                 throw new BetaException("Event format must be: event <description> /from <start> /to <end>");
             }
             break;
+        case "find":
+            
+            if (inputBody.isEmpty()) {
+                throw new BetaException("The 'find' command requires a keyword to search for.");
+            }
+            break;
         case "list":
         case "bye":
 
