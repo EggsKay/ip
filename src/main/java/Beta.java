@@ -69,6 +69,20 @@ public class Beta {
                     tasks.addTask(event);
                     ui.showMessage("Got it. I've added this event:\n  " + event + "\nNow you have " + tasks.getTasks().size() + " tasks in the list.");
                     break;
+                case "find":
+                    TaskList matchingTasks = tasks.findTasks(inputBody);
+
+                    if (matchingTasks.size() == 0) {
+                        ui.showMessage("Sorry, I couldn't find any tasks matching the keyword: '" + inputBody + "'.");
+                    } else {
+                        StringBuilder response = new StringBuilder("Here are the matching tasks in your list:\n");
+
+                        for (int i = 0; i < matchingTasks.size(); i++) {
+                            response.append(String.format("%d. %s\n", i + 1, matchingTasks.get(i)));
+                        }
+                        ui.showMessage(response.toString());
+                    }
+                    break;
                 case "bye":
                     isExit = true;
                     break;
