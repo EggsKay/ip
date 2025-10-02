@@ -1,6 +1,18 @@
+/**
+ * The Parser class handles the parsing of user input strings.
+ * It validates commands and extracts relevant information to be processed by the application.
+ */
 public class Parser {
 
-
+    /**
+     * Parses a full command string into a command and its arguments.
+     * This method handles various commands such as todo, deadline, event, etc.,
+     * and validates the format of the input.
+     *
+     * @param fullCommand The full command line input from the user.
+     * @return A String array where the first element is the command and the second is the input body.
+     * @throws BetaException If the command is empty, or the input format is invalid for a specific command.
+     */
     public static String[] parse(String fullCommand) throws BetaException {
         if (fullCommand == null || fullCommand.trim().isEmpty()) {
 
