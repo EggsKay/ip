@@ -75,8 +75,6 @@ Now you have 3 tasks in the list.
 
 #### **`list`**
 
-#### **`list`**
-
 * **Format:** `list`
 * **Purpose:** Displays all tasks currently in the list with their status (marked or unmarked).
 
