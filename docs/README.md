@@ -19,7 +19,7 @@ This guide provides an overview of the commands you can use to manage your tasks
 ### 1. Adding Tasks
 
 | Command | Format | Purpose |
-| :--- | :--- | :--- |
+| --- | --- | --- |
 | **`todo`** | `todo DESCRIPTION` | Adds a task with no time constraints. |
 | **`deadline`** | `deadline DESCRIPTION /by DATE/TIME` | Adds a task that needs to be completed by a specific date/time. |
 | **`event`** | `event DESCRIPTION /from START_TIME /to END_TIME` | Adds a task that starts at a specific time and ends at another. |
@@ -62,9 +62,9 @@ Now you have 3 tasks in the list.
 ### 2. Viewing and Searching Tasks
 
 
-| Command | Format          | Purpose |
-| :--- |:----------------| :--- |
-| **`list`** | `list`          | Displays all tasks currently in the list with their status (marked or unmarked). |
+| Command | Format         | Purpose |
+| --- |----------------| --- |
+| **`list`** | `list`         | Displays all tasks currently in the list with their status (marked or unmarked). |
 | **`find`** |<code>find&nbsp;KEYWORD</code> | Searches for tasks whose descriptions contain the specified keyword. |
 ---
 #### **`list`**
@@ -90,7 +90,7 @@ Here are the matching tasks in your list:
 ---
 ### 3. Modifying Tasks
 | Command | Format | Purpose |
-| :--- | :--- | :--- |
+| --- | --- | --- |
 | **`mark`** | `mark INDEX` | Marks the task at the specified index as completed. |
 | **`unmark`** | `unmark INDEX` | Marks the task at the specified index as not completed. |
 | **`delete`** | `delete INDEX` | Removes the task at the specified index from the list. |
@@ -127,7 +127,7 @@ Now you have 2 tasks in the list.
 
 ### 4. Exiting the Application
 | Command | Format | Purpose |
-| :--- | :--- | :--- |
+| --- | --- | --- |
 | **`bye`** | `bye` | Exits the application and saves all changes automatically. |
 #### **`bye`**
 Exits the application. All changes are saved automatically upon exit.
